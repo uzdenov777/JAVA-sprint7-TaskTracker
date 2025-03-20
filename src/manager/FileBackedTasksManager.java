@@ -17,6 +17,7 @@ import java.util.Optional;
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private final File saveFile;
+    private String description;
 
     public FileBackedTasksManager(File saveFile) {
         super();
@@ -24,13 +25,20 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     public String toString(Task task) {
-        if (task instanceof Subtask) {
-          return toStringSubtask((Subtask) task);
-        } else if (task instanceof Epic) {
-            return toStringEpic((Epic) task);
-        } else {
-           return toStringTask(task);
+        TypeTask typeTask = task.getType();
+
+        String result;
+        switch (typeTask) {
+            case SUBTASK:
+                result = toStringSubtask((Subtask) task);
+                break;
+            case EPIC:
+                result = toStringEpic((Epic) task);
+                break;
+            default://Значит Task
+                result = toStringTask(task);
         }
+        return result;
     }
 
     public String toStringTask(Task task) {
@@ -40,7 +48,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String name = task.getName();
         String status = task.getStatus().toString();
         String description = task.getDescription();
-        result = String.format("%d,%s,%s,%s,%s,\n", id, type, name, status, description);
+        String startTime = task.getStartTimeToString();
+        long duration = task.getDurationToLong();
+        result = String.format("%d,%s,%s,%s,%s,%s,%d\n", id, type, name, status, description, startTime, duration);
         return result;
     }
 
@@ -51,7 +61,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String name = epic.getName();
         String status = epic.getStatus().toString();
         String description = epic.getDescription();
-        result = String.format("%d,%s,%s,%s,%s,\n", id, type, name, status, description);
+        String startTime = epic.getStartTimeToString();
+        long duration = epic.getDurationToLong();
+        result = String.format("%d,%s,%s,%s,%s,%s,%d\n", id, type, name, status, description, startTime, duration);
         return result;
     }
 
@@ -63,7 +75,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String status = subtask.getStatus().toString();
         String description = subtask.getDescription();
         int idEpic = subtask.getIdEpic();
-        result = String.format("%d,%s,%s,%s,%s,%d\n", id, type, name, status, description, idEpic);
+        String startTime = subtask.getStartTimeToString();
+        long duration = subtask.getDurationToLong();
+        result = String.format("%d,%s,%s,%s,%s,%s,%d,%d\n", id, type, name, status, description, startTime, duration, idEpic);
         return result;
     }
 
@@ -75,22 +89,22 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String name = taskComposition[2];
         StatusTask status = StatusTask.valueOf(taskComposition[3]);
         String description = taskComposition[4];
+        String startTime = taskComposition[5];
+        long duration = Long.parseLong(taskComposition[6]);
 
-
-        Task restoredTask = null;
+        Task restoredTask;
 
         switch (typeTask) {
             case EPIC:
-                restoredTask = new Epic(name, description, id, status);
+                restoredTask = new Epic(name, description, id, status, typeTask);
                 break;
             case SUBTASK:
-                int idEpic = Integer.parseInt(taskComposition[5]);
-                restoredTask = new Subtask(name, description, id, status, idEpic);
+                int idEpic = Integer.parseInt(taskComposition[7]);
+                restoredTask = new Subtask(name, description, id, status, idEpic, typeTask, startTime, duration);
                 break;
-            case TASK:
-                restoredTask = new Task(name, description, id, status);
+            default://Значит Task
+                restoredTask = new Task(name, description, id, status, typeTask, startTime, duration);
                 break;
-            default:
         }
         return restoredTask;
     }
@@ -123,7 +137,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile))) {
-            writer.write("id,type,name,status,description,epic\n");
+            writer.write("id,type,name,status,description,startTime,duration,epic,\n");
 
             ArrayList<Task> allTasksEpicSubtask = getAllTasksEpicSubtask();
 
@@ -153,29 +167,33 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return allTasksEpicSubtask;
     }
 
-    public static FileBackedTasksManager loadFromFile(File file) {
+    public static FileBackedTasksManager loadFromFile(File readerFile, File newWriterFile) {
         FileBackedTasksManager manager;
         ArrayList<String> readTasksFromFile = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(readerFile))) {
 
             while (reader.ready()) {
                 readTasksFromFile.add(reader.readLine());
             }
-            manager = new FileBackedTasksManager(file);
+            manager = new FileBackedTasksManager(newWriterFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         for (int i = 1; i < readTasksFromFile.size(); i++) {
-            String taskTCsvFormat = readTasksFromFile.get(i);
-            if (!taskTCsvFormat.isBlank()) {
-                Task restoredTaskToAdd = manager.fromString(taskTCsvFormat);
-                if (restoredTaskToAdd instanceof Epic) {
-                    manager.addEpic((Epic) restoredTaskToAdd);
-                } else if (restoredTaskToAdd instanceof Subtask) {
-                    manager.addSubtask((Subtask) restoredTaskToAdd);
-                } else {
-                    manager.addTask(restoredTaskToAdd);
+            String taskCsvFormat = readTasksFromFile.get(i);
+            if (!taskCsvFormat.isBlank()) {
+                Task restoredTaskToAdd = manager.fromString(taskCsvFormat);
+                TypeTask typeTask = restoredTaskToAdd.getType();
+                switch (typeTask) {
+                    case EPIC:
+                        manager.addEpic((Epic) restoredTaskToAdd);
+                        break;
+                    case SUBTASK:
+                        manager.addSubtask((Subtask) restoredTaskToAdd);
+                        break;
+                    default:
+                        manager.addTask(restoredTaskToAdd);
                 }
             } else {
                 i++;

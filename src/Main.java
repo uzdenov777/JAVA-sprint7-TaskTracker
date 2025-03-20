@@ -1,5 +1,6 @@
 import manager.FileBackedTasksManager;
 import manager.Managers;
+import manager.enums.TypeTask;
 import manager.interfaces.TaskManager;
 import model.Epic;
 import manager.enums.StatusTask;
@@ -10,15 +11,16 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
-        TaskManager manager = Managers.getFileBackedTasksManager(new File("saveFile.txt"));
-        Task task1 = new Task("task1", "task1task1", manager.getNewId(), StatusTask.NEW);
-        Task task2 = new Task("task2", "task2task2", manager.getNewId(), StatusTask.NEW);
-        Epic epic1 = new Epic("epic1", "epic1epic1", manager.getNewId(), StatusTask.NEW);
-        Epic epic2 = new Epic("epic2", "epic2epic2", manager.getNewId(), StatusTask.NEW);
-        Subtask subtask1 = new Subtask("subtask1", "subtask1subtask1", manager.getNewId(), StatusTask.NEW, epic1.getId());
-        Subtask subtask2 = new Subtask("subtask2", "subtask2subtask2", manager.getNewId(), StatusTask.NEW, epic1.getId());
-        Subtask subtask3 = new Subtask("subtask3", "subtask3subtask3", manager.getNewId(), StatusTask.NEW, epic1.getId());
-        Subtask subtask4 = new Subtask("subtask4", "subtask4subtask4", manager.getNewId(), StatusTask.NEW, epic2.getId());
+        File file1 = new File("saveFile1.txt");
+        TaskManager manager = Managers.getFileBackedTasksManager(file1);
+        Task task1 = new Task("task1", "task1task1", manager.getNewId(), StatusTask.NEW, TypeTask.TASK, "20.03.2025 12:00", 30);
+        Task task2 = new Task("task2", "task2task2", manager.getNewId(), StatusTask.NEW, TypeTask.TASK, "20.03.2025 12:00", 30);
+        Epic epic1 = new Epic("epic1", "epic1epic1", manager.getNewId(), StatusTask.NEW, TypeTask.EPIC);
+        Epic epic2 = new Epic("epic2", "epic2epic2", manager.getNewId(), StatusTask.NEW, TypeTask.EPIC);
+        Subtask subtask1 = new Subtask("subtask1", "subtask1subtask1", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "20.03.2025 12:00", 30);
+        Subtask subtask2 = new Subtask("subtask2", "subtask2subtask2", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "20.03.2025 12:00", 30);
+        Subtask subtask3 = new Subtask("subtask3", "subtask3subtask3", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "20.03.2025 12:00", 30);
+        Subtask subtask4 = new Subtask("subtask4", "subtask4subtask4", manager.getNewId(), StatusTask.NEW, epic2.getId(), TypeTask.SUBTASK, "20.03.2025 12:00", 30);
         manager.addTask(task1);
         manager.addTask(task2);
 
@@ -44,8 +46,8 @@ public class Main {
         manager.getTask(task1.getId());//6
         manager.getTask(task2.getId());//7
         manager.getSubtask(subtask4.getId());//8
-
-        TaskManager manager1 = FileBackedTasksManager.loadFromFile(new File("saveFile.txt"));
+        File file2 = new File("saveFile2.txt");
+        TaskManager manager1 = FileBackedTasksManager.loadFromFile(file1, file2);
 
         boolean task = manager.getListTasks().equals(manager1.getListTasks());
         int taskListSize1 = manager.getListTasks().size();

@@ -1,14 +1,15 @@
 package model;
 
 import manager.enums.StatusTask;
+import manager.enums.TypeTask;
 
 import java.util.Objects;
 
 public class Subtask extends Task {
     private int idEpic;
 
-    public Subtask(String name, String description, int id, StatusTask status, int idEpic) {
-        super(name, description, id, status);
+    public Subtask(String name, String description, int id, StatusTask status, int idEpic, TypeTask typeTask, String startTime, long duration) {
+        super(name, description, id, status, typeTask, startTime, duration);
         this.idEpic = idEpic;
     }
 
