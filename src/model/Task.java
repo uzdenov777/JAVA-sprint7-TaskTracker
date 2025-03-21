@@ -4,10 +4,9 @@ import manager.enums.StatusTask;
 import manager.enums.TypeTask;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 public class Task {
@@ -15,7 +14,7 @@ public class Task {
     protected final String description;
     protected StatusTask status;
     protected final int id;
-    protected TypeTask type;
+    protected final TypeTask type;
 
 
     protected LocalDateTime startTime;
@@ -28,12 +27,29 @@ public class Task {
         this.id = id;
         this.status = status;
         this.type = type;
-        this.duration = Duration.ofMinutes(duration);
-        if (startTime != null) {
-            this.startTime = LocalDateTime.parse(startTime, formatter);
-        } else {
-            this.startTime = null;
+        this.duration = validDuration(duration, type);
+        this.startTime = validDateTime(startTime, formatter, type);
+    }
+
+    protected LocalDateTime validDateTime(String startTime, DateTimeFormatter formatter, TypeTask type) {
+        LocalDateTime result = null;
+        try {
+            if (type != TypeTask.EPIC) {
+                result = LocalDateTime.parse(startTime, formatter);
+            }
+        } catch (DateTimeParseException | NullPointerException e) {
+            throw new IllegalArgumentException("Передан неверный формат даты или null для Task и Subtask. Валидный формат для Task, Subtask -> ДД.ММ.ГГГГ ЧЧ:ММ.");
         }
+        return result;
+    }
+
+    private static Duration validDuration(long duration, TypeTask type) {
+        boolean notEpic = type != TypeTask.EPIC;
+        boolean notZeroAndNotNegative = duration <= 0;
+        if (notEpic && notZeroAndNotNegative) {
+            throw new IllegalArgumentException("Продолжительность задачи принимается от 1 минуты.");
+        }
+        return Duration.ofMinutes(duration);
     }
 
     public String getName() {
@@ -48,12 +64,12 @@ public class Task {
         return type;
     }
 
-    public LocalDateTime getEndTime() {
-        return startTime.plus(duration);
-    }
-
     public LocalDateTime getStartTime() {
         return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
     }
 
     public Duration getDuration() {
@@ -61,7 +77,14 @@ public class Task {
     }
 
     public String getStartTimeToString() {
+        if (startTime == null) {
+            return null;
+        }
         return startTime.format(formatter);
+    }
+
+    public String getEndTimeToString() {
+        return startTime.plus(duration).format(formatter);
     }
 
     public long getDurationToLong() {
@@ -73,9 +96,6 @@ public class Task {
     }
 
     public StatusTask getStatus() {
-        if (status == null) {
-            return null;
-        }
         return status;
     }
 

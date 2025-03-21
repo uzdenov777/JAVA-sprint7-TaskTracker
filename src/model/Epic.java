@@ -3,14 +3,13 @@ package model;
 import manager.enums.StatusTask;
 import manager.enums.TypeTask;
 
-import java.security.Key;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Objects;
 
 public class Epic extends Task {
-    private LocalDateTime endTime;
     private final HashMap<Integer, Subtask> subtaskHashMap = new HashMap<>();
 
     public Epic(String name, String description, int id, StatusTask status, TypeTask typeTask) {
@@ -18,27 +17,35 @@ public class Epic extends Task {
     }
 
     @Override
-    public LocalDateTime getEndTime() {
-        return super.getEndTime();
-    }
-
-    @Override
     public LocalDateTime getStartTime() {
+        startTimeEpic(subtaskHashMap);
         return super.getStartTime();
     }
 
     @Override
+    public LocalDateTime getEndTime() {
+        startTimeEpic(subtaskHashMap);
+        durationEpic(subtaskHashMap);
+        return super.getEndTime();
+    }
+
+    @Override
     public Duration getDuration() {
+        durationEpic(subtaskHashMap);
         return super.getDuration();
     }
 
     @Override
     public String getStartTimeToString() {
-        if (subtaskHashMap.isEmpty()) {
-            return null;
-        }
         startTimeEpic(subtaskHashMap);
         return super.getStartTimeToString();
+    }
+
+    @Override
+    public String getEndTimeToString() {
+        startTimeEpic(subtaskHashMap);
+        durationEpic(subtaskHashMap);
+        return super.getEndTimeToString();
     }
 
     @Override
@@ -47,7 +54,7 @@ public class Epic extends Task {
         return super.getDurationToLong();
     }
 
-    public void startTimeEpic(HashMap<Integer, Subtask> subtaskHashMap) {
+    private void startTimeEpic(HashMap<Integer, Subtask> subtaskHashMap) {
         LocalDateTime startTime = null;
         for (HashMap.Entry<Integer, Subtask> entry : subtaskHashMap.entrySet()) {
             Subtask subtask = entry.getValue();
@@ -62,7 +69,7 @@ public class Epic extends Task {
         this.startTime = startTime;
     }
 
-    public void durationEpic(HashMap<Integer, Subtask> subtaskHashMap) {
+    private void durationEpic(HashMap<Integer, Subtask> subtaskHashMap) {
         Duration durationResult = Duration.ZERO;
         for (HashMap.Entry<Integer, Subtask> entry : subtaskHashMap.entrySet()) {
             Subtask subtask = entry.getValue();
@@ -70,11 +77,6 @@ public class Epic extends Task {
         }
         this.duration = durationResult;
     }
-
-//    @Override
-//    public LocalDateTime getEndTime() {
-//
-//    }
 
     public void addSubtask(Subtask subtask) {
         subtaskHashMap.put(subtask.getId(), subtask);
