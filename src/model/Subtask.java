@@ -33,11 +33,14 @@ public class Subtask extends Task {
     @Override
     public String toString() {
         return "Subtask{" +
-                "idEpic=" + idEpic +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
+                "name='" + name +
+                ", description='" + description +
+                ", type=" + type +
                 ", id=" + id +
+                ", status=" + status +
+                ", startTime=" + startTime + '\'' +
+                ", duration=" + duration + '\'' +
+                ", idEpic=" + idEpic +
                 '}';
     }
 }

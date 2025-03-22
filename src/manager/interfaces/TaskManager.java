@@ -17,6 +17,8 @@ public interface TaskManager {
 
     List<Subtask> getListSubtasks(); //Получение списка всех подзадач
 
+    List<Task> getAllTasksEpicSubtask();
+
     HashMap<Integer, Task> getMapTasks();
 
     HashMap<Integer, Epic> getMapEpics();
@@ -57,5 +59,7 @@ public interface TaskManager {
 
     int getNewId();
 
-    ArrayList<Task> getHistory();
+    List<Task> getHistory();
+
+    List<Task> getValidatedTasks();
 }

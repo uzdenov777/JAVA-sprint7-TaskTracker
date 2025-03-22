@@ -18,43 +18,43 @@ public class Epic extends Task {
 
     @Override
     public LocalDateTime getStartTime() {
-        startTimeEpic(subtaskHashMap);
+        startTimeEpic();
         return super.getStartTime();
     }
 
     @Override
     public LocalDateTime getEndTime() {
-        startTimeEpic(subtaskHashMap);
-        durationEpic(subtaskHashMap);
+        startTimeEpic();
+        durationEpic();
         return super.getEndTime();
     }
 
     @Override
     public Duration getDuration() {
-        durationEpic(subtaskHashMap);
+        durationEpic();
         return super.getDuration();
     }
 
     @Override
     public String getStartTimeToString() {
-        startTimeEpic(subtaskHashMap);
+        startTimeEpic();
         return super.getStartTimeToString();
     }
 
     @Override
     public String getEndTimeToString() {
-        startTimeEpic(subtaskHashMap);
-        durationEpic(subtaskHashMap);
+        startTimeEpic();
+        durationEpic();
         return super.getEndTimeToString();
     }
 
     @Override
     public long getDurationToLong() {
-        durationEpic(subtaskHashMap);
+        durationEpic();
         return super.getDurationToLong();
     }
 
-    private void startTimeEpic(HashMap<Integer, Subtask> subtaskHashMap) {
+    private void startTimeEpic() {
         LocalDateTime startTime = null;
         for (HashMap.Entry<Integer, Subtask> entry : subtaskHashMap.entrySet()) {
             Subtask subtask = entry.getValue();
@@ -69,7 +69,7 @@ public class Epic extends Task {
         this.startTime = startTime;
     }
 
-    private void durationEpic(HashMap<Integer, Subtask> subtaskHashMap) {
+    private void durationEpic() {
         Duration durationResult = Duration.ZERO;
         for (HashMap.Entry<Integer, Subtask> entry : subtaskHashMap.entrySet()) {
             Subtask subtask = entry.getValue();
@@ -80,9 +80,23 @@ public class Epic extends Task {
 
     public void addSubtask(Subtask subtask) {
         subtaskHashMap.put(subtask.getId(), subtask);
+        startTimeEpic();
+        durationEpic();
     }
 
-    public HashMap<Integer, Subtask> getSubtasksArray() {
+    public void removeSubtaskById(int id) {
+        subtaskHashMap.remove(id);
+        startTimeEpic();
+        durationEpic();
+    }
+
+    public void clearSubtasks() {
+        subtaskHashMap.clear();
+        startTimeEpic();
+        durationEpic();
+    }
+
+    public HashMap<Integer, Subtask> getSubtasksMap() {
         return subtaskHashMap;
     }
 
@@ -103,10 +117,13 @@ public class Epic extends Task {
     @Override
     public String toString() {
         return "Epic{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
+                "name='" + name +
+                ", description='" + description +
+                ", type=" + type +
                 ", id=" + id +
+                ", status=" + status +
+                ", startTime=" + startTime + '\'' +
+                ", duration=" + duration + '\'' +
                 '}';
     }
 }

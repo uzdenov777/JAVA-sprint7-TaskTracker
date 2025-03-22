@@ -9,10 +9,7 @@ import model.Subtask;
 import model.Task;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
@@ -27,7 +24,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile))) {
             writer.write("id,type,name,status,description,startTime,duration,epic\n");
 
-            ArrayList<Task> allTasksEpicSubtask = getAllTasksEpicSubtask();
+            List<Task> allTasksEpicSubtask = getAllTasksEpicSubtask();
 
             if (allTasksEpicSubtask.isEmpty()) {
                 System.out.println("Не добавлено ни одной задачи в приложение для сохранения в файл");
@@ -117,14 +114,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         resultBuilder.deleteCharAt(resultBuilder.length() - 1);
         return resultBuilder.toString();
-    }
-
-    private ArrayList<Task> getAllTasksEpicSubtask() {
-        ArrayList<Task> allTasksEpicSubtask = new ArrayList<>();
-        allTasksEpicSubtask.addAll(getListTasks());
-        allTasksEpicSubtask.addAll(getListEpics());
-        allTasksEpicSubtask.addAll(getListSubtasks());
-        return allTasksEpicSubtask;
     }
 
     public static FileBackedTasksManager loadFromFile(File readerFile, File newWriterFile) {
@@ -347,4 +336,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         return isRemove;
     }
+
+//    @Override
+//    public Set<Task> getPrioritizedTasks() {
+//        return super.getPrioritizedTasks();
+//    }
 }

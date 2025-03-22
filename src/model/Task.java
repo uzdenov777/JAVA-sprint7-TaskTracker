@@ -27,23 +27,23 @@ public class Task {
         this.id = id;
         this.status = status;
         this.type = type;
-        this.duration = validDuration(duration, type);
-        this.startTime = validDateTime(startTime, formatter, type);
+        this.duration = getValidDuration(duration, type);
+        this.startTime = getValidDateTime(startTime, formatter, type);
     }
 
-    protected LocalDateTime validDateTime(String startTime, DateTimeFormatter formatter, TypeTask type) {
+    protected LocalDateTime getValidDateTime(String startTime, DateTimeFormatter formatter, TypeTask type) {
         LocalDateTime result = null;
         try {
             if (type != TypeTask.EPIC) {
                 result = LocalDateTime.parse(startTime, formatter);
             }
         } catch (DateTimeParseException | NullPointerException e) {
-            throw new IllegalArgumentException("Передан неверный формат даты или null для Task и Subtask. Валидный формат для Task, Subtask -> ДД.ММ.ГГГГ ЧЧ:ММ.");
+            throw new IllegalArgumentException("Передан неверный формат даты или null для Task и Subtask. Валидный формат для Task, Subtask -> ДД.ММ.ГГГГ ЧЧ:ММ");
         }
         return result;
     }
 
-    private static Duration validDuration(long duration, TypeTask type) {
+    private static Duration getValidDuration(long duration, TypeTask type) {
         boolean notEpic = type != TypeTask.EPIC;
         boolean notZeroAndNotNegative = duration <= 0;
         if (notEpic && notZeroAndNotNegative) {
@@ -106,10 +106,13 @@ public class Task {
     @Override
     public String toString() {
         return "Task{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status='" + status + '\'' +
+                "name='" + name +
+                ", description='" + description +
+                ", type=" + type +
                 ", id=" + id +
+                ", status=" + status +
+                ", startTime=" + startTime + '\'' +
+                ", duration=" + duration + '\'' +
                 '}';
     }
 

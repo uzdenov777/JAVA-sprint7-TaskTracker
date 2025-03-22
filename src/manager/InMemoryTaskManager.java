@@ -1,5 +1,6 @@
 package manager;
 
+import manager.enums.TypeTask;
 import manager.interfaces.HistoryManager;
 import manager.interfaces.TaskManager;
 import model.Epic;
@@ -7,10 +8,8 @@ import manager.enums.StatusTask;
 import model.Subtask;
 import model.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 
 public class InMemoryTaskManager implements TaskManager {
@@ -96,8 +95,7 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.removeSubtaskAll(subtasks);
 
             for (Epic epic : epics.values()) {
-                HashMap<Integer, Subtask> mapDelete = epic.getSubtasksArray();
-                mapDelete.clear();
+                epic.clearSubtasks();
 
                 int epicId = epic.getId();
                 StatusTask.checkStatus(epicId, epics);
@@ -188,8 +186,8 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (isEpicExist) {
             subtasks.put(idSubtaskInput, subtaskInput);
-            epics.get(idEpic).
-                    addSubtask(subtaskInput); //Добавляет подзадачу в список определенного Epic.
+            Epic epic = epics.get(idEpic);
+            epic.addSubtask(subtaskInput); //Добавляет подзадачу в список определенного Epic.
             StatusTask.checkStatus(idEpic, epics); //Проверяет статус Epic после добавления в него подзадачи.
             return true;
         } else {
@@ -197,7 +195,6 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         }
     }
-
 
     @Override
     public boolean updateTask(Task taskInput) { // Обновление Task. Новая версия объекта с верным идентификатором передаётся в виде параметра.
@@ -220,7 +217,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (isEpicExist) {
             epics.put(idEpicInput, epicInput);
-            HashMap<Integer, Subtask> epicInputSubtasksMap = epicInput.getSubtasksArray();
+            HashMap<Integer, Subtask> epicInputSubtasksMap = epicInput.getSubtasksMap();
             for (Subtask subtask : epicInputSubtasksMap.values()) {//Обновляю список всех существующих подзадач, после обновления Epic.
                 subtasks.put(idEpicInput, subtask);
             }
@@ -271,7 +268,7 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.removeById(id);//удаляет Epic по ID в истории задач
 
             Epic epicDelete = epics.get(id);
-            HashMap<Integer, Subtask> subtasksEpicMap = epicDelete.getSubtasksArray();
+            HashMap<Integer, Subtask> subtasksEpicMap = epicDelete.getSubtasksMap();
             for (Subtask subtask : subtasksEpicMap.values()) {//удаляет подзадачи Epic-а по ID в истории задач
                 int subtaskId = subtask.getId();
                 historyManager.removeById(subtaskId);
@@ -295,12 +292,10 @@ public class InMemoryTaskManager implements TaskManager {
         boolean containsSubtask = subtasks.containsKey(id);
 
         if (containsSubtask) {
-
             Subtask subtaskDelete = subtasks.get(id);
             int idEpicSubtask = subtaskDelete.getIdEpic(); //сохраняет ID Epic пока не удалил Subtask.
             Epic epicSubtaskDelete = epics.get(idEpicSubtask);
-            HashMap<Integer, Subtask> subtaskHashMapEpic = epicSubtaskDelete.getSubtasksArray();
-            subtaskHashMapEpic.remove(id);//Удаление Subtask по идентификатору в самом Epic.
+            epicSubtaskDelete.removeSubtaskById(id);//Удаление Subtask по идентификатору в самом Epic.
             subtasks.remove(id);
             StatusTask.checkStatus(idEpicSubtask, epics);
 
@@ -316,15 +311,46 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (epics.containsKey(id)) {
             Epic epic = epics.get(id);
-            return epic.getSubtasksArray();
+            return epic.getSubtasksMap();
         }
 
         System.out.println("Такого Epic нету");
         return new HashMap<>();
     }
 
-
     public HistoryManager getHistoryManager() {
         return historyManager;
     }
+
+//    public List<Task> getPrioritizedTasks() {
+//
+//    }
+
+    public List<Task> getValidatedTasks() {
+        List<Task> validatedTasks = getAllTasksEpicSubtask();
+
+        for (int i = 0; i < validatedTasks.size(); i++) {
+            boolean isTypeEpic = TypeTask.EPIC == validatedTasks.get(i).getType();
+
+            boolean isEpicNotEmptyMapSubtasks = false;
+            if (isTypeEpic) {
+                Epic epic = (Epic) validatedTasks.get(i);
+                isEpicNotEmptyMapSubtasks = !(epic.getSubtasksMap().isEmpty());
+            }
+
+            if (isEpicNotEmptyMapSubtasks) {
+                validatedTasks.remove(i);
+            }
+        }
+        return validatedTasks;
+    }
+
+    public List<Task> getAllTasksEpicSubtask() {
+        List<Task> allTasksEpicSubtask = new ArrayList<>();
+        allTasksEpicSubtask.addAll(getListTasks());
+        allTasksEpicSubtask.addAll(getListEpics());
+        allTasksEpicSubtask.addAll(getListSubtasks());
+        return allTasksEpicSubtask;
+    }
 }
+
