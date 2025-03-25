@@ -74,7 +74,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isNotEmpty = !tasks.isEmpty();
         if (isNotEmpty) {
             historyManager.removeTaskAll(tasks);
-            prioritizedManager.removeAllTasksFromPrioritizedAndNullLists(tasks);
+            prioritizedManager.clearAllTasksFromPrioritizedAndNullLists(tasks);
             tasks.clear();
             return true;
         } else {
@@ -89,8 +89,8 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.removeEpicAll(epics);//Удаляет все Epics из истории задач
             historyManager.removeSubtaskAll(subtasks);//Удаляет все Subtasks из истории задач
 
-            prioritizedManager.removeAllSubtasksFromPrioritizedAndNullLists(subtasks);// //Удаляет все Subtasks из временного периода(prioritizedTasksNotNUll)
-            prioritizedManager.removeAllEpicsFromPrioritizedAndNullLists(epics);// Удаляет все Epics из временного периода (nullDateTasks)
+            prioritizedManager.clearAllSubtasksFromPrioritizedAndNullLists(subtasks);// //Удаляет все Subtasks из временного периода(prioritizedTasksNotNUll)
+            prioritizedManager.clearAllEpicsFromPrioritizedAndNullLists(epics);// Удаляет все Epics из временного периода (nullDateTasks)
             epics.clear();
             subtasks.clear();
             return true;
@@ -110,7 +110,7 @@ public class InMemoryTaskManager implements TaskManager {
                 prioritizedManager.removeTaskFromPrioritizedAndNullLists(epic);
                 prioritizedManager.addTaskWithoutIntersection(epic);
             }
-            prioritizedManager.removeAllSubtasksFromPrioritizedAndNullLists(subtasks);
+            prioritizedManager.clearAllSubtasksFromPrioritizedAndNullLists(subtasks);
             historyManager.removeSubtaskAll(subtasks);
             subtasks.clear();
             return true;
@@ -163,7 +163,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isAddTaskWithoutIntersection;
 
         if (isTaskExist) {
-            System.out.println("Задача с таким ID уже создана. Не добавлен Epic "+taskInput.getName()+" с ID:"+taskInput.getId());
+            System.out.println("Задача с таким ID уже создана. Не добавлен Epic " + taskInput.getName() + " с ID:" + taskInput.getId());
             return false;
         }
 
@@ -172,7 +172,7 @@ public class InMemoryTaskManager implements TaskManager {
             tasks.put(idTaskInput, taskInput);
             return true;
         } else {
-            System.out.println("Обнаружено пересечение задач. Не добавлен Epic "+taskInput.getName()+" с ID:"+taskInput.getId());
+            System.out.println("Обнаружено пересечение задач. Не добавлен Epic " + taskInput.getName() + " с ID:" + taskInput.getId());
             return false;
         }
     }
@@ -183,10 +183,10 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isEpicExist = epics.containsKey(idEpicInput);//Проверяет на наличие Epic.
 
         if (isEpicExist) {
-            System.out.println("Epic с таким ID уже создан. Не добавлен Epic "+epicInput.getName()+" с ID:"+epicInput.getId());
+            System.out.println("Epic с таким ID уже создан. Не добавлен Epic " + epicInput.getName() + " с ID:" + epicInput.getId());
             return false;
         } else {
-            //Вставляет Epic в nullDateTasks потому ,что создаются все эпики без подзадач и у эпика тогда startTime == null.
+            //Вставляет Epic в nullDateTasks потому, что создаются все эпики без подзадач и у эпика тогда startTime == null.
             prioritizedManager.addTaskWithoutIntersection(epicInput);
             epics.put(idEpicInput, epicInput);
             return true;
@@ -199,7 +199,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isSubtaskExist = subtasks.containsKey(idSubtaskInput); // Проверяет на наличие подзадачи.
 
         if (isSubtaskExist) {
-            System.out.println("Подзадача с таким ID уже создана. Не добавлена подзадача "+subtaskInput.getName()+" с ID:"+subtaskInput.getId());
+            System.out.println("Подзадача с таким ID уже создана. Не добавлена подзадача " + subtaskInput.getName() + " с ID:" + subtaskInput.getId());
             return false;
         }
 
@@ -221,11 +221,11 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (!isEpicExist) {
-            System.out.println("Такого Epic не существует для добавления в него подзадачи. Не добавлена подзадача "+subtaskInput.getName()+" с ID:"+subtaskInput.getId());
+            System.out.println("Такого Epic не существует для добавления в него подзадачи. Не добавлена подзадача " + subtaskInput.getName() + " с ID:" + subtaskInput.getId());
             return false;
         }
 
-        System.out.println("Обнаружено пересечение задач. Не добавлена подзадача "+subtaskInput.getName()+" с ID:"+subtaskInput.getId());
+        System.out.println("Обнаружено пересечение задач. Не добавлена подзадача " + subtaskInput.getName() + " с ID:" + subtaskInput.getId());
         return false;
     }
 
@@ -233,12 +233,21 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean updateTask(Task taskInput) { //Обновление Task. Новая версия объекта с верным идентификатором передаётся в виде параметра.
         int idTaskInput = taskInput.getId();
         boolean isTaskExist = tasks.containsKey(idTaskInput);
+        boolean isUpdateTaskWithoutIntersection;
 
         if (isTaskExist) {
+            Task oldTask = tasks.get(idTaskInput);
+            isUpdateTaskWithoutIntersection = prioritizedManager.updateTaskWithoutIntersection(taskInput, oldTask);
+        } else {
+            System.out.println("Такой Задачи не существует для обновления");
+            return false;
+        }
+
+        if (isUpdateTaskWithoutIntersection) {
             tasks.put(idTaskInput, taskInput);
             return true;
         } else {
-            System.out.println("Такой Задачи не существует для обновления");
+            System.out.println("Обнаружено пересечение для обновления задачи.");
             return false;
         }
     }
@@ -250,9 +259,17 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (isEpicExist) {
             epics.put(idEpicInput, epicInput);
+            prioritizedManager.updateEpicWithoutIntersection(epicInput, epics.get(idEpicInput));// передали новую и старую версию для обновления
             HashMap<Integer, Subtask> epicInputSubtasksMap = epicInput.getSubtasksMap();
-            for (Subtask subtask : epicInputSubtasksMap.values()) {//Обновляю список всех существующих подзадач, после обновления Epic.
-                subtasks.put(idEpicInput, subtask);
+            for (Subtask subtask : epicInputSubtasksMap.values()) {//Обновляю список всех подзадач обновленного Epic-а его после обновления.
+                int idSubtask = subtask.getId();
+                boolean isAddSubtask = prioritizedManager.updateSubtaskWithoutIntersection(subtask, subtasks.get(idSubtask));// передали новую и старую версию для обновления
+                if (isAddSubtask) {// и за одно проверили можно ли вставить возможно обновленную по времени подзадачу без пересечения
+                    subtasks.put(idSubtask, subtask);
+                } else {
+                    System.out.println("Обнаружено пересечение задач ,во время обновлении подзадачи. Не добавлена подзадача " + subtask.getName() + " c id:" + subtask.getId());
+                    return false;
+                }
             }
             return true;
         } else {
@@ -265,8 +282,17 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean updateSubtask(Subtask subtaskInput) { // Обновление Subtask. Новая версия объекта с верным идентификатором передаётся в виде параметра.
         int idSubtaskInput = subtaskInput.getId();
         boolean isSubtaskExist = subtasks.containsKey(idSubtaskInput);
+        boolean isUpdateSubtaskWithoutIntersection;
 
         if (isSubtaskExist) {
+            Subtask oldSubtask = subtasks.get(idSubtaskInput);
+            isUpdateSubtaskWithoutIntersection = prioritizedManager.updateSubtaskWithoutIntersection(subtaskInput, oldSubtask);
+        } else {
+            System.out.println("Такой подзадачи не существует для обновления");
+            return false;
+        }
+
+        if (isUpdateSubtaskWithoutIntersection) {
             subtasks.put(idSubtaskInput, subtaskInput);
             int idEpic = subtaskInput.getIdEpic();
             Epic epicSubtaskInput = epics.get(idEpic);
@@ -274,7 +300,7 @@ public class InMemoryTaskManager implements TaskManager {
             StatusTask.checkStatus(epicSubtaskInput); //Проверяет статус Epic после обновления его подзадачи.
             return true;
         } else {
-            System.out.println("Такой подзадачи не существует для обновления");
+            System.out.println("Обнаружено пересечение задач ,во время обновлении подзадачи. Не добавлена подзадача " + subtaskInput.getName() + " c id:" + subtaskInput.getId());
             return false;
         }
     }
@@ -311,7 +337,7 @@ public class InMemoryTaskManager implements TaskManager {
                 subtasks.remove(idSubtask);
 
             }
-            prioritizedManager.removeAllSubtasksFromPrioritizedAndNullLists(subtasksEpicMap); // Удаляет все подзадачи из временного диапазона.
+            prioritizedManager.clearAllSubtasksFromPrioritizedAndNullLists(subtasksEpicMap); // Удаляет все подзадачи из временного диапазона.
             prioritizedManager.removeTaskFromPrioritizedAndNullLists(epicDelete);// Удаляет Epic из временного диапазона.
             historyManager.removeById(id);//удаляет Epic по ID в истории задач
             epics.remove(id);

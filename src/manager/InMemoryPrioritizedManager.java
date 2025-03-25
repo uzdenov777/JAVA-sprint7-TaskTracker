@@ -72,6 +72,46 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
         }
     }
 
+    public boolean updateTaskWithoutIntersection(Task newTask, Task oldTask) {
+        removeTaskFromPrioritizedAndNullLists(oldTask);// Удаляем старую чтобы не мешалась
+
+        boolean addTask = addTaskWithoutIntersection(newTask);// Пробуем добавить новую задачу
+        if (addTask) {
+            return true;
+        } else {
+            addTaskWithoutIntersection(oldTask);// Если не получилось добавить новую возвращаем старую на свое место.
+            return false;
+        }
+    }
+
+    public void updateEpicWithoutIntersection(Epic newEpic, Epic oldEpic) {
+        LocalDateTime newStartTime = newEpic.getStartTime();
+        LocalDateTime oldStartTime = oldEpic.getStartTime();
+
+        if (oldStartTime == null) { // если oldStartTime не null значит эпик нигде не храниться как отдельная задача во временном диапазоне
+            nullDateTasks.remove(oldEpic);
+        }
+
+        if (newStartTime == null) {
+            System.out.println("Обновление прошло успешно!");// значит нет подзадач у эпика и добавляем в nullDateTasks.
+            addTaskWithoutIntersection(newEpic);
+        } else {
+            System.out.println("Обновление прошло успешно!");// все равно возвращаем true потому что все нужные операции с ним выполнены все нужные операции по обновлению
+        }
+    }
+
+    public boolean updateSubtaskWithoutIntersection(Subtask newSubtask, Subtask oldTSubtask) {
+        removeTaskFromPrioritizedAndNullLists(oldTSubtask);// Удаляем старую чтобы не мешалась
+
+        boolean isAddTask = addTaskWithoutIntersection(newSubtask);// Пробуем добавить новую задачу
+        if (isAddTask) {
+            return true;
+        } else {
+            addTaskWithoutIntersection(oldTSubtask);// Если не получилось добавить новую возвращаем старую на свое место.
+            return false;
+        }
+    }
+
     public void removeTaskFromPrioritizedAndNullLists(Task task) {
         LocalDateTime startOutTask = task.getStartTime();
 
@@ -82,14 +122,14 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
         }
     }
 
-    public void removeAllTasksFromPrioritizedAndNullLists(Map<Integer, Task> inputTasksMap) {
+    public void clearAllTasksFromPrioritizedAndNullLists(Map<Integer, Task> inputTasksMap) {
         for (Task task : inputTasksMap.values()) {
             LocalDateTime startOutTask = task.getStartTime();
             prioritizedTasksNotNUll.remove(startOutTask);
         }
     }
 
-    public void removeAllEpicsFromPrioritizedAndNullLists(Map<Integer, Epic> inputTasksMap) {
+    public void clearAllEpicsFromPrioritizedAndNullLists(Map<Integer, Epic> inputTasksMap) {
         for (Epic epic : inputTasksMap.values()) {
             LocalDateTime startOutTask = epic.getStartTime();
             if (startOutTask == null) { // Скорее всего это Epic, у которого нет подзадач и поэтому находиться в nullDateTasks.
@@ -98,7 +138,7 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
         }
     }
 
-    public void removeAllSubtasksFromPrioritizedAndNullLists(Map<Integer, Subtask> inputTasksMap) {
+    public void clearAllSubtasksFromPrioritizedAndNullLists(Map<Integer, Subtask> inputTasksMap) {
         for (Subtask subtask : inputTasksMap.values()) {
             LocalDateTime startOutTask = subtask.getStartTime();
             prioritizedTasksNotNUll.remove(startOutTask);

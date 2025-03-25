@@ -12,13 +12,19 @@ public interface PrioritizedManager {
 
     boolean addTaskWithoutIntersection(Task task);
 
+    boolean updateTaskWithoutIntersection(Task newTask, Task oldTask);
+
+    void updateEpicWithoutIntersection(Epic newEpic, Epic oldEpic);
+
+    boolean updateSubtaskWithoutIntersection(Subtask newSubtask, Subtask oldTSubtask);
+
     void removeTaskFromPrioritizedAndNullLists(Task task);
 
-    void removeAllTasksFromPrioritizedAndNullLists(Map<Integer, Task> inputTasksMap);
+    void clearAllTasksFromPrioritizedAndNullLists(Map<Integer, Task> inputTasksMap);
 
-    void removeAllEpicsFromPrioritizedAndNullLists(Map<Integer, Epic> inputTasksMap);
+    void clearAllEpicsFromPrioritizedAndNullLists(Map<Integer, Epic> inputTasksMap);
 
-    void removeAllSubtasksFromPrioritizedAndNullLists(Map<Integer, Subtask> inputTasksMap);
+    void clearAllSubtasksFromPrioritizedAndNullLists(Map<Integer, Subtask> inputTasksMap);
 
     List<Task> getPrioritizedTasks();
 }
