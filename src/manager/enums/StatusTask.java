@@ -10,8 +10,7 @@ public enum StatusTask {
     IN_PROGRESS,
     DONE;
 
-    public static void checkStatus(int epicId, HashMap<Integer, Epic> epics) {
-        Epic epic = epics.get(epicId);
+    public static void checkStatus(Epic epic) {
         HashMap<Integer, Subtask> subtasks = epic.getSubtasksMap();
 
         int countNew = 0;

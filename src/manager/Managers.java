@@ -1,6 +1,7 @@
 package manager;
 
 import manager.interfaces.HistoryManager;
+import manager.interfaces.PrioritizedManager;
 import manager.interfaces.TaskManager;
 
 import java.io.File;
@@ -17,5 +18,9 @@ public class Managers {
 
     public static TaskManager getFileBackedTasksManager(File saveFile) {
         return new FileBackedTasksManager(saveFile);
+    }
+
+    public static PrioritizedManager getDefaultPrioritizedManager() {
+        return new InMemoryPrioritizedManager();
     }
 }
