@@ -8,6 +8,7 @@ import model.Subtask;
 import model.Task;
 
 import java.io.File;
+import java.util.List;
 
 import static java.lang.System.out;
 
@@ -22,7 +23,7 @@ public class Main {
         Subtask subtask1 = new Subtask("subtask1", "subtask1subtask1", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "23.03.2025 12:00", 1);
         Subtask subtask2 = new Subtask("subtask2", "subtask2subtask2", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "23.03.2025 12:00", 30);
         Subtask subtask3 = new Subtask("subtask3", "subtask3subtask3", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "24.03.2025 12:00", 30);
-        Subtask subtask4 = new Subtask("subtask4", "subtask4subtask4", manager.getNewId(), StatusTask.NEW, epic2.getId(), TypeTask.SUBTASK, "25.03.2025 12:00", 30);
+        Subtask subtask4 = new Subtask("subtask4", "subtask4subtask4", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "25.03.2025 12:00", 30);
         manager.addTask(task1);
         manager.addTask(task2);
 
@@ -33,19 +34,40 @@ public class Main {
         manager.addSubtask(subtask2);
         manager.addSubtask(subtask3);
         manager.addSubtask(subtask4);
-//        List<Task> list = manager.getAllTasksEpicSubtask();
-//        for (Task task : list) {
-//            out.println(task);
-//        }
-//        manager.removeSubtaskById(subtask4.getId());
-//
-//        List<Task> list1 = manager.getValidatedTasks();
-//
-//        out.println();
-//        for (Task task : list1) {
-//            out.println(task);
-//        }
+        out.println(task1.getStartTimeToString());
+        out.println(task1.getDurationToLong());
+        out.println(task1.getDuration());
+        out.println(task1.getEndTimeToString());
+        out.println();
+        out.println(epic1.getStartTimeToString());
+        out.println(epic1.getDurationToLong());
+        out.println(epic1.getDuration());
+        out.println(epic1.getEndTimeToString());
+        out.println();
+        out.println(epic2.getStartTimeToString());
+        out.println(epic2.getDurationToLong());
+        out.println(epic2.getDuration());
+        out.println(epic2.getEndTimeToString());
+        out.println();
+        out.println(subtask1.getStartTimeToString());
+        out.println(subtask1.getDurationToLong());
+        out.println(subtask1.getDuration());
+        out.println(subtask1.getEndTimeToString());
 
+        out.println();
+        List<Task> list = manager.getAllTasksEpicSubtask();
+        for (Task task : list) {
+            out.println(task);
+        }
+        manager.removeSubtaskById(subtask4.getId());
+
+        List<Task> list1 = manager.getValidatedTasks();
+
+        out.println();
+        for (Task task : list1) {
+            out.println(task);
+        }
+        out.println();
         manager.getEpic(epic1.getId());//
         manager.getEpic(epic2.getId());//1
         manager.getSubtask(subtask1.getId());//

@@ -69,6 +69,9 @@ public class Task {
     }
 
     public LocalDateTime getEndTime() {
+        if (startTime == null) {
+            return null;
+        }
         return startTime.plus(duration);
     }
 
@@ -84,6 +87,9 @@ public class Task {
     }
 
     public String getEndTimeToString() {
+        if (startTime == null) {
+            return null;
+        }
         return startTime.plus(duration).format(formatter);
     }
 

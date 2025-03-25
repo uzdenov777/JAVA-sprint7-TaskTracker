@@ -1,10 +1,9 @@
 package manager;
 
-import manager.enums.TypeTask;
+import manager.enums.StatusTask;
 import manager.interfaces.HistoryManager;
 import manager.interfaces.TaskManager;
 import model.Epic;
-import manager.enums.StatusTask;
 import model.Subtask;
 import model.Task;
 
@@ -16,6 +15,8 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Task> tasks = new HashMap<>(); //Хранит задачи.
     private final HashMap<Integer, Epic> epics = new HashMap<>();//Хранит Epic.
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();//Хранит подзадачи.
+    private final TreeMap<LocalDateTime, Task> prioritizedTasksNotNUll = new TreeMap<>();
+    private final List<Task> nullDateTasks = new ArrayList<>();
     private final HistoryManager historyManager = Managers.getDefaultHistory();
     private int countId = 0;
 
@@ -147,34 +148,45 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean addTask(Task taskInput) { //Добавляет полученный объект Task в соответсвующий HashMap и проверяет, если такой ID уже.
         int idTaskInput = taskInput.getId();
         boolean isTaskExist = tasks.containsKey(idTaskInput);// Проверяет на наличие задачи.
+        boolean isAddTaskWithoutIntersection = addTaskWithoutIntersection(taskInput);//Проверяет можно ли вставить задачу без пересечения по времени с другими задачами.
+
 
         if (isTaskExist) {
             System.out.println("Задача с таким ID уже создана");
             return false;
-        } else {
+        } else if (isAddTaskWithoutIntersection) {
             tasks.put(idTaskInput, taskInput);
             return true;
+        } else {
+            System.out.println("Обнаружено пересечение задач");
+            return false;
         }
     }
 
     @Override
-    public boolean addEpic(Epic taskInput) { //Добавляет полученный объект Epic в соответсвующий HashMap и проверяет, если такой ID уже.
-        int idEpicInput = taskInput.getId();
+    public boolean addEpic(Epic epicInput) { //Добавляет полученный объект Epic в соответсвующий HashMap и проверяет, если такой ID уже.
+        int idEpicInput = epicInput.getId();
         boolean isEpicExist = epics.containsKey(idEpicInput);//Проверяет на наличие Epic.
+        boolean isAddTaskWithoutIntersection = addTaskWithoutIntersection(epicInput);//Проверяет можно ли вставить задачу без пересечения по времени с другими задачами.
 
         if (isEpicExist) {
             System.out.println("Epic с таким ID уже создан");
             return false;
-        } else {
-            epics.put(idEpicInput, taskInput);
+        }
+
+        if (isAddTaskWithoutIntersection) {
+            epics.put(idEpicInput, epicInput);
             return true;
+        } else {
+            System.out.println("Обнаружено пересечение задач");
+            return false;
         }
     }
 
     @Override
     public boolean addSubtask(Subtask subtaskInput) { //Добавляет полученный объект Subtask в соответсвующий HashMap и проверяет, если такой ID уже.
         int idSubtaskInput = subtaskInput.getId();
-        boolean isSubtaskExist = subtasks.containsKey(idSubtaskInput);
+        boolean isSubtaskExist = subtasks.containsKey(idSubtaskInput); // Проверяет на наличие подзадачи.
 
         if (isSubtaskExist) {
             System.out.println("Подзадача с таким ID уже создана");
@@ -182,22 +194,32 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         int idEpic = subtaskInput.getIdEpic();
-        boolean isEpicExist = epics.containsKey(idEpic);//если есть Epic, к которому подзадача принадлежит.
+        boolean isEpicExist = epics.containsKey(idEpic); //Если есть Epic, к которому подзадача принадлежит.
+        boolean isAddTaskWithoutIntersection = false; //Можно ли вставить задачу без пересечения по времени с другими задачами.
 
         if (isEpicExist) {
+            isAddTaskWithoutIntersection = addTaskWithoutIntersection(subtaskInput); //Проверяет можно ли вставить задачу без пересечения по времени с другими задачами.
+        }
+
+        if (isEpicExist && isAddTaskWithoutIntersection) {
             subtasks.put(idSubtaskInput, subtaskInput);
             Epic epic = epics.get(idEpic);
             epic.addSubtask(subtaskInput); //Добавляет подзадачу в список определенного Epic.
             StatusTask.checkStatus(idEpic, epics); //Проверяет статус Epic после добавления в него подзадачи.
             return true;
-        } else {
+        }
+
+        if (!isEpicExist) {
             System.out.println("Такого Epic не существует для добавления в него подзадачи");
             return false;
         }
+
+        System.out.println("Обнаружено пересечение задач");
+        return false;
     }
 
     @Override
-    public boolean updateTask(Task taskInput) { // Обновление Task. Новая версия объекта с верным идентификатором передаётся в виде параметра.
+    public boolean updateTask(Task taskInput) { //Обновление Task. Новая версия объекта с верным идентификатором передаётся в виде параметра.
         int idTaskInput = taskInput.getId();
         boolean isTaskExist = tasks.containsKey(idTaskInput);
 
@@ -322,28 +344,62 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager;
     }
 
-//    public List<Task> getPrioritizedTasks() {
-//
-//    }
 
-    public List<Task> getValidatedTasks() {
-        List<Task> validatedTasks = getAllTasksEpicSubtask();
+    private boolean addTaskWithoutIntersection(Task task) {
+        LocalDateTime startOutTask = task.getStartTime();
+        LocalDateTime endOutTask = task.getEndTime();
 
-        for (int i = 0; i < validatedTasks.size(); i++) {
-            boolean isTypeEpic = TypeTask.EPIC == validatedTasks.get(i).getType();
 
-            boolean isEpicNotEmptyMapSubtasks = false;
-            if (isTypeEpic) {
-                Epic epic = (Epic) validatedTasks.get(i);
-                isEpicNotEmptyMapSubtasks = !(epic.getSubtasksMap().isEmpty());
-            }
+        if (startOutTask == null) {//Null может быть только у Epic-a, у которого нет подзадач, такие Epic-и храним в отдельном списке.
+            nullDateTasks.add(task);
+            return true;
+        }
 
-            if (isEpicNotEmptyMapSubtasks) {
-                validatedTasks.remove(i);
+        // Проверка на пересечение с уже существующей задачей (по времени)
+        if (prioritizedTasksNotNUll.containsKey(startOutTask)) {
+            System.out.println("Дата начала задачи уже занята!");
+            return false;
+        }
+
+        // Проверка, если задача должна быть вставлена перед самой первой задачей
+        LocalDateTime before = prioritizedTasksNotNUll.lowerKey(startOutTask);
+        if (before == null) {
+            LocalDateTime first = prioritizedTasksNotNUll.firstKey();
+            if (endOutTask.isBefore(first)) {
+                prioritizedTasksNotNUll.put(startOutTask, task);
+                return true;
             }
         }
-        return validatedTasks;
+
+        Task previousTask = prioritizedTasksNotNUll.get(before);
+        LocalDateTime previousTaskEndTime = previousTask.getEndTime();
+
+        // Если задача начинается после окончания предыдущей
+        if (startOutTask.isAfter(previousTaskEndTime)) {
+            LocalDateTime nextTaskStartTime = prioritizedTasksNotNUll.higherKey(startOutTask);
+            // Если следующей задачи нет
+            if (nextTaskStartTime == null) {
+                prioritizedTasksNotNUll.put(startOutTask, task);
+                return true;
+            }
+
+            //Задача заканчивается до начала следующей задачи
+            if (endOutTask.isBefore(nextTaskStartTime)) {
+                prioritizedTasksNotNUll.put(startOutTask, task);
+                return true;
+            }
+
+            System.out.println("Задача не закончена вовремя");
+        }
+        return false;
     }
+
+    public List<Task> getPrioritizedTasks() {
+        List<Task> prioritizedTasks = new ArrayList<>(prioritizedTasksNotNUll.values());
+        prioritizedTasks.addAll(nullDateTasks);
+        return prioritizedTasks;
+    }
+
 
     public List<Task> getAllTasksEpicSubtask() {
         List<Task> allTasksEpicSubtask = new ArrayList<>();

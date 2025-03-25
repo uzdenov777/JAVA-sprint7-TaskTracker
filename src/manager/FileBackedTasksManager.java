@@ -336,9 +336,4 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         return isRemove;
     }
-
-//    @Override
-//    public Set<Task> getPrioritizedTasks() {
-//        return super.getPrioritizedTasks();
-//    }
 }
