@@ -28,10 +28,10 @@ public class Task {
         this.status = status;
         this.type = type;
         this.duration = getValidDuration(duration, type);
-        this.startTime = getValidDateTime(startTime, formatter, type);
+        this.startTime = getValidDateTime(startTime, type);
     }
 
-    protected LocalDateTime getValidDateTime(String startTime, DateTimeFormatter formatter, TypeTask type) {
+    protected LocalDateTime getValidDateTime(String startTime, TypeTask type) {
         LocalDateTime result = null;
         try {
             if (type != TypeTask.EPIC) {

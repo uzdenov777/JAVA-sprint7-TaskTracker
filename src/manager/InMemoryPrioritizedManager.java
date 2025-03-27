@@ -63,11 +63,11 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
                 prioritizedTasksNotNUll.put(startOutTask, task);
                 return true;
             } else {
-                System.out.println("Задача не закончена вовремя.");
+                System.out.println("Задача, которую вы хотите добавить не закончена вовремя.");
                 return false;
             }
         } else {
-            System.out.println("Задача начинается до окончания предыдущей задачи.");
+            System.out.println("Задача, которую вы хотите добавить начинается до окончания предыдущей задачи.");
             return false;
         }
     }
