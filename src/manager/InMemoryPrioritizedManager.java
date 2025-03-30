@@ -1,5 +1,6 @@
 package manager;
 
+import manager.enums.TypeTask;
 import manager.interfaces.PrioritizedManager;
 import model.Epic;
 import model.Subtask;
@@ -113,11 +114,14 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
     }
 
     public void removeTaskFromPrioritizedAndNullLists(Task task) {
-        LocalDateTime startOutTask = task.getStartTime();
+        TypeTask type = task.getType();
 
-        if (startOutTask == null) { // Скорее всего это Epic, у которого нет подзадач и поэтому находиться в nullDateTasks.
+        boolean isEpic = type == TypeTask.EPIC;
+        // Скорее всего это Epic, у которого нет подзадач и поэтому находиться в nullDateTasks.
+        if (isEpic) { // либо у него появилась подзадача и теперь не должен быть в nullData
             nullDateTasks.remove(task);
         } else {
+            LocalDateTime startOutTask = task.getStartTime();
             prioritizedTasksNotNUll.remove(startOutTask);
         }
     }

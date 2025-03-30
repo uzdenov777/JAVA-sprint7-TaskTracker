@@ -16,6 +16,7 @@ public class Main {
     public static void main(String[] args) {
         File file1 = new File("saveFile1.txt");
         TaskManager manager = Managers.getFileBackedTasksManager(file1);
+        manager.clearSubtasks();
         Task task1 = new Task("task", "task1task1", manager.getNewId(), StatusTask.NEW, TypeTask.TASK, "21.03.2025 12:00", 1);
         Task task2 = new Task("task2", "task2task2", manager.getNewId(), StatusTask.NEW, TypeTask.TASK, "20.03.2025 12:00", 30);
         Epic epic1 = new Epic("epic1", "epic1epic1", manager.getNewId(), StatusTask.NEW, TypeTask.EPIC);
@@ -23,8 +24,7 @@ public class Main {
         Subtask subtask1 = new Subtask("subtask1", "subtask1subtask1", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "24.03.2025 12:00", 1);
         Subtask subtask2 = new Subtask("subtask2", "subtask2subtask2", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "20.03.2025 12:00", 30);
         Subtask subtask3 = new Subtask("subtask3", "subtask3subtask3", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "27.03.2025 12:00", 30);
-        Subtask subtask4 = new Subtask("subtask4", "subtask4subtask4", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "25.03.2025 12:00", 30);
-        manager.addTask(task1);
+        Subtask subtask4 = new Subtask("subtask4", "subtask4subtask4", manager.getNewId(), StatusTask.NEW, epic1.getId(), TypeTask.SUBTASK, "25.03.2025 12:00", 30);//        manager.addTask(task1);
         manager.addTask(task2);
 
         manager.addEpic(epic1);
@@ -34,25 +34,25 @@ public class Main {
         manager.addSubtask(subtask2);
         manager.addSubtask(subtask3);
         manager.addSubtask(subtask4);
-//        out.println(task1.getStartTimeToString());
-//        out.println(task1.getDurationToLong());
-//        out.println(task1.getDuration());
-//        out.println(task1.getEndTimeToString());
-//        out.println();
-//        out.println(epic1.getStartTimeToString());
-//        out.println(epic1.getDurationToLong());
-//        out.println(epic1.getDuration());
-//        out.println(epic1.getEndTimeToString());
-//        out.println();
-//        out.println(epic2.getStartTimeToString());
-//        out.println(epic2.getDurationToLong());
-//        out.println(epic2.getDuration());
-//        out.println(epic2.getEndTimeToString());
-//        out.println();
-//        out.println(subtask1.getStartTimeToString());
-//        out.println(subtask1.getDurationToLong());
-//        out.println(subtask1.getDuration());
-//        out.println(subtask1.getEndTimeToString());
+        out.println(task1.getStartTimeToString());
+        out.println(task1.getDurationToLong());
+        out.println(task1.getDuration());
+        out.println(task1.getEndTimeToString());
+        out.println();
+        out.println(epic1.getStartTimeToString());
+        out.println(epic1.getDurationToLong());
+        out.println(epic1.getDuration());
+        out.println(epic1.getEndTimeToString());
+        out.println();
+        out.println(epic2.getStartTimeToString());
+        out.println(epic2.getDurationToLong());
+        out.println(epic2.getDuration());
+        out.println(epic2.getEndTimeToString());
+        out.println();
+        out.println(subtask1.getStartTimeToString());
+        out.println(subtask1.getDurationToLong());
+        out.println(subtask1.getDuration());
+        out.println(subtask1.getEndTimeToString());
 
         out.println();
         List<Task> list = manager.getAllTasksEpicSubtask();
@@ -70,7 +70,7 @@ public class Main {
         manager.getEpic(epic1.getId());//
         manager.getEpic(epic2.getId());//1
         manager.getSubtask(subtask1.getId());//
-        // manager.getSubtask(subtask2.getId());//2
+         manager.getSubtask(subtask2.getId());//2
         manager.getSubtask(subtask3.getId());//3
         manager.getEpic(epic1.getId());//
         manager.getEpic(epic1.getId());//

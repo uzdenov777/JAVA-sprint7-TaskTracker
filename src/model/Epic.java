@@ -5,7 +5,6 @@ import manager.enums.TypeTask;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -16,84 +15,83 @@ public class Epic extends Task {
         super(name, description, id, status, typeTask, null, 0);
     }
 
-    @Override
-    public LocalDateTime getStartTime() {
-        startTimeEpic();
-        return super.getStartTime();
+    private void startTimeEpic(Integer inputId, String operation) {
+        boolean isClearAll = inputId == null && operation.equals("ZERO");
+        if (isClearAll) {
+            this.startTime = null;
+            return;
+        }
+        Subtask subtask = subtaskHashMap.get(inputId);
+
+        LocalDateTime startTime = subtask.getStartTime();
+        switch (operation) {
+            case "+":
+                if (this.startTime == null) {
+                    this.startTime = startTime;
+                } else if (startTime.isBefore(this.startTime)) {
+                    this.startTime = startTime;
+                }
+
+                break;
+            case "-":
+                if (startTime == this.startTime) {
+                    this.startTime = returnNewStartTime();
+                }
+                break;
+        }
     }
 
-    @Override
-    public LocalDateTime getEndTime() {
-        startTimeEpic();
-        durationEpic();
-        return super.getEndTime();
-    }
-
-    @Override
-    public Duration getDuration() {
-        durationEpic();
-        return super.getDuration();
-    }
-
-    @Override
-    public String getStartTimeToString() {
-        startTimeEpic();
-        return super.getStartTimeToString();
-    }
-
-    @Override
-    public String getEndTimeToString() {
-        startTimeEpic();
-        durationEpic();
-        return super.getEndTimeToString();
-    }
-
-    @Override
-    public long getDurationToLong() {
-        durationEpic();
-        return super.getDurationToLong();
-    }
-
-    private void startTimeEpic() {
-        LocalDateTime startTime = null;
-        for (HashMap.Entry<Integer, Subtask> entry : subtaskHashMap.entrySet()) {
-            Subtask subtask = entry.getValue();
-            if (startTime == null) {
-                startTime = subtask.getStartTime();
+    private LocalDateTime returnNewStartTime() {
+        LocalDateTime newStartTime = null;
+        for (Subtask subtask : subtaskHashMap.values()) {
+            LocalDateTime startTimeSubtask = subtask.getStartTime();
+            if (this.startTime == null) {
+                return startTimeSubtask;
             }
-            boolean isAfter = startTime.isAfter(subtask.getStartTime());
-            if (isAfter) {
-                startTime = subtask.getStartTime();
+
+            if (startTimeSubtask.isBefore(this.startTime)) {
+                newStartTime = startTimeSubtask;
             }
         }
-        this.startTime = startTime;
+        return newStartTime;
     }
 
-    private void durationEpic() {
-        Duration durationResult = Duration.ZERO;
-        for (HashMap.Entry<Integer, Subtask> entry : subtaskHashMap.entrySet()) {
-            Subtask subtask = entry.getValue();
-            durationResult = durationResult.plus(subtask.getDuration());
+    private void durationEpic(Integer inputId, String operation) {
+        boolean isClearAll = inputId == null && operation.equals("ZERO");
+        if (isClearAll) {
+            this.duration = Duration.ZERO;
+            return;
         }
-        this.duration = durationResult;
+        Subtask subtask = subtaskHashMap.get(inputId);
+        Duration durationSubtask = subtask.getDuration();
+        switch (operation) {
+            case "+":
+                this.duration = this.duration.plus(durationSubtask);
+                break;
+            case "-":
+                this.duration = this.duration.minus(durationSubtask);
+                break;
+        }
     }
 
     public void addSubtask(Subtask subtask) {
-        subtaskHashMap.put(subtask.getId(), subtask);
-        startTimeEpic();
-        durationEpic();
+        int id = subtask.getId();
+        subtaskHashMap.put(id, subtask);
+        startTimeEpic(id, "+");
+        durationEpic(id, "+");
     }
 
     public void removeSubtaskById(int id) {
+        startTimeEpic(id, "-");
+        durationEpic(id, "-");
         subtaskHashMap.remove(id);
-        startTimeEpic();
-        durationEpic();
+
     }
 
     public void clearSubtasks() {
         subtaskHashMap.clear();
-        startTimeEpic();
-        durationEpic();
+        startTimeEpic(null, "ZERO");
+        durationEpic(null, "ZERO");
     }
 
     public HashMap<Integer, Subtask> getSubtasksMap() {

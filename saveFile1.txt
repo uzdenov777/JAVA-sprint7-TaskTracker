@@ -1,10 +1,5 @@
 id,type,name,status,description,startTime,duration,epic
 1,TASK,task,NEW,task1task1,21.03.2025 12:00,1
-2,TASK,task2,NEW,task2task2,20.03.2025 12:00,30
-3,EPIC,epic1,NEW,epic1epic1,24.03.2025 12:00,61
-4,EPIC,epic2,NEW,epic2epic2,null,0
-5,SUBTASK,subtask1,NEW,subtask1subtask1,24.03.2025 12:00,1,3
-7,SUBTASK,subtask3,NEW,subtask3subtask3,27.03.2025 12:00,30,3
-8,SUBTASK,subtask4,NEW,subtask4subtask4,25.03.2025 12:00,30,3
+2,EPIC,epic1,NEW,epic1epic1,24.03.2025 12:00,1
+3,SUBTASK,subtask1,NEW,subtask1subtask1,24.03.2025 12:00,1,2
 
-4,7,3,5,1,2,8

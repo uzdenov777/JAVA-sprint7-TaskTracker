@@ -50,6 +50,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public List<Subtask> getListSubtasks() { //Получение списка всех подзадач
+        return new ArrayList<>(subtasks.values());
+    }
+
+    @Override
     public HashMap<Integer, Task> getMapTasks() {
         return tasks;
     }
@@ -62,11 +67,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public HashMap<Integer, Subtask> getMapSubtasks() {
         return subtasks;
-    }
-
-    @Override
-    public List<Subtask> getListSubtasks() { //Получение списка всех подзадач
-        return new ArrayList<>(subtasks.values());
     }
 
     @Override
@@ -163,7 +163,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isAddTaskWithoutIntersection;
 
         if (isTaskExist) {
-            System.out.println("Задача с таким ID уже создана. Не добавлен Epic " + taskInput.getName() + " с ID:" + taskInput.getId());
+            System.out.println("Задача с таким ID уже создана. Не добавлен Task " + taskInput.getName() + " с ID:" + taskInput.getId());
             return false;
         }
 
@@ -172,7 +172,7 @@ public class InMemoryTaskManager implements TaskManager {
             tasks.put(idTaskInput, taskInput);
             return true;
         } else {
-            System.out.println("Обнаружено пересечение задач. Не добавлен Epic " + taskInput.getName() + " с ID:" + taskInput.getId());
+            System.out.println("Обнаружено пересечение задач. Не добавлен Task" + taskInput.getName() + " с ID:" + taskInput.getId());
             return false;
         }
     }
@@ -211,7 +211,7 @@ public class InMemoryTaskManager implements TaskManager {
             isAddTaskWithoutIntersection = prioritizedManager.addTaskWithoutIntersection(subtaskInput); //Проверяет можно ли вставить задачу без пересечения по времени с другими задачами.
         }
 
-        if (isEpicExist && isAddTaskWithoutIntersection) {
+        if (isAddTaskWithoutIntersection) {
             subtasks.put(idSubtaskInput, subtaskInput);
             Epic epic = epics.get(idEpic);
             epic.addSubtask(subtaskInput); //Добавляет подзадачу в список определенного Epic.
