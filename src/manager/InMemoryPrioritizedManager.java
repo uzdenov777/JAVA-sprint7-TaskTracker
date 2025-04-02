@@ -94,10 +94,8 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
         }
 
         if (newStartTime == null) {
-            System.out.println("Обновление прошло успешно!");// значит нет подзадач у эпика и добавляем в nullDateTasks.
+         // значит нет подзадач у эпика и добавляем в nullDateTasks.
             addTaskWithoutIntersection(newEpic);
-        } else {
-            System.out.println("Обновление прошло успешно!");// все равно возвращаем true потому что все нужные операции с ним выполнены все нужные операции по обновлению
         }
     }
 

@@ -8,9 +8,9 @@ import java.io.File;
 
 public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
-    @BeforeEach
-    public void createTaskManager() {
+    @Override
+    public FileBackedTasksManager createTaskManager() {
         File file1 = new File("saveFile1.txt");
-        this.manager = new FileBackedTasksManager(file1);
+        return new FileBackedTasksManager(file1);
     }
 }

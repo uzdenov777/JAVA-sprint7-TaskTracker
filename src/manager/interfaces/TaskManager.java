@@ -54,11 +54,13 @@ public interface TaskManager {
 
     boolean removeSubtaskById(int id);//Удаление Subtask по идентификатору.
 
-    HashMap<Integer, Subtask> getListSubtasks(int id); //Получение списка всех подзадач определённого Epic.
+    HashMap<Integer, Subtask> getMapSubtasksByEpicId(int id); //Получение списка всех подзадач определённого Epic.
 
     int getNewId();
 
     List<Task> getHistory();
+
+    HistoryManager getHistoryManager();
 
     List<Task> getPrioritizedTasks();
 }

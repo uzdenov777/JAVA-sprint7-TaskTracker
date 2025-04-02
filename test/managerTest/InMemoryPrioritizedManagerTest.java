@@ -11,5 +11,4 @@ public class InMemoryPrioritizedManagerTest extends PrioritizedManagerTest<InMem
         return new InMemoryPrioritizedManager();
     }
 
-
 }
