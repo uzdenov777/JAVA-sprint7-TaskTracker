@@ -36,6 +36,32 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
+    public void removeFirst() {
+        Node oldFirst = first;
+        Task getOldTask = first.task;
+        int idTask = getOldTask.getId();
+
+        first = first.next;
+        first.prev = null;
+        historyTask.remove(idTask);
+        oldFirst.next = null;
+        oldFirst.prev = null;
+    }
+
+    @Override
+    public void removeLast() {
+        Node oldLast = last;
+        Task getOldTask = last.task;
+        int idTask = getOldTask.getId();
+
+        last = last.prev;
+        last.next = null;
+        historyTask.remove(idTask);
+        oldLast.next = null;
+        oldLast.prev = null;
+    }
+
+    @Override
     public void removeById(int id) { //удаляет запись по ID
         if (historyTask.containsKey(id)) {
             Node nodeDeleted = historyTask.get(id);
@@ -80,6 +106,27 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
+    public void removeNode(Node node) { // вырезает запись
+        int idDeletingNode = node.task.getId();
+
+        if (first == node) { //вырезает начало
+            first = first.next;
+            first.prev = null;
+        } else if (last == node) { // вырезает конец
+            last = last.prev;
+            last.next = null;
+        } else {
+            Node previous = node.prev; // вырезает между - среднюю запись
+            Node next = node.next;
+            previous.next = next;
+            next.prev = previous;
+        }
+        historyTask.remove(idDeletingNode);
+        node.next = null;
+        node.prev = null;
+    }
+
+    @Override
     public HashMap<Integer, Node> getTasksHistoryInMap() { // возвращает хэш таблицу historyTask
         return historyTask;
     }
@@ -114,24 +161,13 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public void removeNode(Node node) { // вырезает запись
-        int idDeletingNode = node.task.getId();
+    public Task getFirst() {
+        return first.task;
+    }
 
-        if (first == node) { //вырезает начало
-            first = first.next;
-            first.prev = null;
-        } else if (last == node) { // вырезает конец
-            last = last.prev;
-            last.next = null;
-        } else {
-            Node previous = node.prev; // вырезает между - среднюю запись
-            Node next = node.next;
-            previous.next = next;
-            next.prev = previous;
-        }
-        historyTask.remove(idDeletingNode);
-        node.next = null;
-        node.prev = null;
+    @Override
+    public Task getLast() {
+        return last.task;
     }
 
     public class Node {

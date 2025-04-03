@@ -119,6 +119,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public static FileBackedTasksManager loadFromFile(File readerFile, File newWriterFile) {
         FileBackedTasksManager manager;
         ArrayList<String> readTasksFromFile = new ArrayList<>();
+
+
         try (BufferedReader reader = new BufferedReader(new FileReader(readerFile))) {
 
             while (reader.ready()) {
@@ -127,6 +129,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             manager = new FileBackedTasksManager(newWriterFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+
+        if (readTasksFromFile.isEmpty()) {
+            return manager;
         }
 
         for (int i = 1; i < readTasksFromFile.size(); i++) {
@@ -144,9 +150,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     default:
                         manager.addTask(restoredTaskToAdd);
                 }
-            } else {
+            } else if (i+1 == readTasksFromFile.size()-1) {
                 i++;
-                List<Integer> history = historyFromString(readTasksFromFile.get(i));
+                String historyCsvFormat = readTasksFromFile.get(i);
+                List<Integer> history = historyFromString(historyCsvFormat);
                 manager.addHistory(history, manager);
             }
         }

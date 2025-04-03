@@ -157,12 +157,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean addTask(Task taskInput) { //Добавляет полученный объект Task в соответсвующий HashMap и проверяет, если такой ID уже.
+        if (Objects.isNull(taskInput)) {
+            System.out.println("Переданный объект Null");
+            return false;
+        }
+
         int idTaskInput = taskInput.getId();
         boolean isTaskExist = tasks.containsKey(idTaskInput);// Проверяет на наличие задачи.
         boolean isAddTaskWithoutIntersection;
 
         if (isTaskExist) {
-            System.out.println("Задача с таким ID уже создана. Не добавлен Task " + taskInput.getName() + " с ID:" + taskInput.getId());
+            System.out.println("Задача с таким ID уже создана. Не добавлен задача " + taskInput.getName() + " с ID:" + taskInput.getId());
             return false;
         }
 
@@ -171,18 +176,23 @@ public class InMemoryTaskManager implements TaskManager {
             tasks.put(idTaskInput, taskInput);
             return true;
         } else {
-            System.out.println("Обнаружено пересечение задач. Не добавлен Task" + taskInput.getName() + " с ID:" + taskInput.getId());
+            System.out.println("Обнаружено пересечение задач. Не добавлен задача " + taskInput.getName() + " с ID:" + taskInput.getId());
             return false;
         }
     }
 
     @Override
     public boolean addEpic(Epic epicInput) { //Добавляет полученный объект Epic в соответсвующий HashMap и проверяет, если такой ID уже.
+        if (Objects.isNull(epicInput)) {
+            System.out.println("Переданный объект Null");
+            return false;
+        }
+
         int idEpicInput = epicInput.getId();
         boolean isEpicExist = epics.containsKey(idEpicInput);//Проверяет на наличие Epic.
 
         if (isEpicExist) {
-            System.out.println("Epic с таким ID уже создан. Не добавлен Epic " + epicInput.getName() + " с ID:" + epicInput.getId());
+            System.out.println("Epic с таким ID уже создан. Не добавлен " + epicInput.getName() + " с ID:" + epicInput.getId());
             return false;
         } else {
             //Вставляет Epic в nullDateTasks потому, что создаются все эпики без подзадач и у эпика тогда startTime == null.
@@ -194,6 +204,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean addSubtask(Subtask subtaskInput) { //Добавляет полученный объект Subtask в соответсвующий HashMap и проверяет, если такой ID уже.
+        if (Objects.isNull(subtaskInput)) {
+            System.out.println("Переданный объект Null");
+            return false;
+        }
+
         int idSubtaskInput = subtaskInput.getId();
         boolean isSubtaskExist = subtasks.containsKey(idSubtaskInput); // Проверяет на наличие подзадачи.
 

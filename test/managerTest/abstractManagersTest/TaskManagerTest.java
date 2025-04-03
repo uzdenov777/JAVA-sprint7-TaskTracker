@@ -92,7 +92,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void getListEmptyPrioritizedTasks() {
+    public void getListEmptyPrioritizedTasks_WhenNoTasksAdd() {
         List<Task> prioritizedTasks = manager.getPrioritizedTasks();
 
         assertNotNull(prioritizedTasks);

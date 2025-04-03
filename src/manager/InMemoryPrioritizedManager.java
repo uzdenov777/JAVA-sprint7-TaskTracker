@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class InMemoryPrioritizedManager implements PrioritizedManager {
-    private final TreeMap<LocalDateTime, Task> prioritizedTasksNotNUll = new TreeMap<>();
+    private final TreeMap<LocalDateTime, Task> tasksByPriority = new TreeMap<>();
     private final List<Task> nullDateTasks = new ArrayList<>();
 
     public boolean addTaskWithoutIntersection(Task task) {
@@ -26,42 +26,45 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
             return true;
         }
 
-        if (prioritizedTasksNotNUll.isEmpty()) { //Если не добавлено еще ни одной задачи можно ничего не проверять и вставлять
-            prioritizedTasksNotNUll.put(startOutTask, task);
+        if (tasksByPriority.isEmpty()) { //Если не добавлено еще ни одной задачи можно ничего не проверять и вставлять
+            tasksByPriority.put(startOutTask, task);
             return true;
         }
 
         // Проверка на пересечение с уже существующей задачей (по времени)
-        if (prioritizedTasksNotNUll.containsKey(startOutTask)) {
+        if (tasksByPriority.containsKey(startOutTask)) {
             System.out.println("Дата начала задачи уже занята!");
             return false;
         }
 
         // Проверка, если задача должна быть вставлена перед самой первой задачей
-        LocalDateTime before = prioritizedTasksNotNUll.lowerKey(startOutTask);
+        LocalDateTime before = tasksByPriority.lowerKey(startOutTask);
         if (before == null) {
-            LocalDateTime first = prioritizedTasksNotNUll.firstKey();
+            LocalDateTime first = tasksByPriority.firstKey();
             if (endOutTask.isBefore(first)) {
-                prioritizedTasksNotNUll.put(startOutTask, task);
+                tasksByPriority.put(startOutTask, task);
                 return true;
+            }else {
+                System.out.println("Задача которую хотите добавить заканчивается позже чем начало следующей");
+                return false;
             }
         }
 
-        Task previousTask = prioritizedTasksNotNUll.get(before);
+        Task previousTask = tasksByPriority.get(before);
         LocalDateTime previousTaskEndTime = previousTask.getEndTime();
 
         // Если задача начинается после окончания предыдущей
         if (startOutTask.isAfter(previousTaskEndTime)) {
-            LocalDateTime nextTaskStartTime = prioritizedTasksNotNUll.higherKey(startOutTask);
+            LocalDateTime nextTaskStartTime = tasksByPriority.higherKey(startOutTask);
             // Если следующей задачи нет
             if (nextTaskStartTime == null) {
-                prioritizedTasksNotNUll.put(startOutTask, task);
+                tasksByPriority.put(startOutTask, task);
                 return true;
             }
 
             //Задача заканчивается до начала следующей задачи
             if (endOutTask.isBefore(nextTaskStartTime)) {
-                prioritizedTasksNotNUll.put(startOutTask, task);
+                tasksByPriority.put(startOutTask, task);
                 return true;
             } else {
                 System.out.println("Задача, которую вы хотите добавить не закончена вовремя.");
@@ -120,14 +123,14 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
             nullDateTasks.remove(task);
         } else {
             LocalDateTime startOutTask = task.getStartTime();
-            prioritizedTasksNotNUll.remove(startOutTask);
+            tasksByPriority.remove(startOutTask);
         }
     }
 
     public void clearAllTasksFromPrioritizedAndNullLists(Map<Integer, Task> inputTasksMap) {
         for (Task task : inputTasksMap.values()) {
             LocalDateTime startOutTask = task.getStartTime();
-            prioritizedTasksNotNUll.remove(startOutTask);
+            tasksByPriority.remove(startOutTask);
         }
     }
 
@@ -143,12 +146,12 @@ public class InMemoryPrioritizedManager implements PrioritizedManager {
     public void clearAllSubtasksFromPrioritizedAndNullLists(Map<Integer, Subtask> inputTasksMap) {
         for (Subtask subtask : inputTasksMap.values()) {
             LocalDateTime startOutTask = subtask.getStartTime();
-            prioritizedTasksNotNUll.remove(startOutTask);
+            tasksByPriority.remove(startOutTask);
         }
     }
 
     public List<Task> getPrioritizedTasks() {
-        List<Task> prioritizedTasks = new ArrayList<>(prioritizedTasksNotNUll.values());
+        List<Task> prioritizedTasks = new ArrayList<>(tasksByPriority.values());
         prioritizedTasks.addAll(nullDateTasks);
         return prioritizedTasks;
     }

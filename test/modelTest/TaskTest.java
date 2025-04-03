@@ -41,7 +41,7 @@ public class TaskTest {
     }
 
     @Test
-    public void returnTrueAndFalseIsTwoAddTaskWithTwoIdenticalDates() {//Пересечение
+    public void returnTrueAndFalseIsTwoAddTask_WithTwoIdenticalDates() {//Пересечение
         Task task = new Task("task", "task1task1", manager.getNewId(), StatusTask.NEW, TypeTask.TASK, "20.03.2025 12:00", 30);
         Task task2 = new Task("task2", "task2task2", manager.getNewId(), StatusTask.NEW, TypeTask.TASK, "20.03.2025 12:10", 30);
 

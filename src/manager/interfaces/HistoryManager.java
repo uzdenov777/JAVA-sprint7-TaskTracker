@@ -13,6 +13,10 @@ public interface HistoryManager {
 
     void add(Task task);
 
+    void removeFirst();
+
+    void removeLast();
+
     void removeById(int id);
 
     void removeTaskAll(Map<Integer, Task> tasksMap);
@@ -29,4 +33,7 @@ public interface HistoryManager {
 
     void removeNode(Node node);
 
+    Task getFirst();
+
+    Task getLast();
 }
